@@ -9,9 +9,13 @@ class Board
     end
 
     def populate
+        tile_values = [:B] * @size + [:_] * @size * (@size - 1)
+        tile_values.shuffle!
+        i = 0
         (0...@size).each do |row|
             (0...@size).each do |col|
-                @grid[row][col] = Tile.new(:_)
+                @grid[row][col] = Tile.new(tile_values[i])
+                i += 1
             end
         end
     end
