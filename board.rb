@@ -4,12 +4,15 @@ class Board
     def initialize(size)
         @size = size
         @grid = Array.new(size) { Array.new(size) }
+        @bomb_count = size
+        @non_bomb_count = size * (size - 1)
+        @lost = false
         populate()
         self.render()
     end
 
     def populate
-        tile_values = [:B] * @size + [:_] * @size * (@size - 1)
+        tile_values = [true] * @bomb_count + [false] * @non_bomb_count
         tile_values.shuffle!
         i = 0
         (0...@size).each do |row|
@@ -30,8 +33,21 @@ class Board
     end
 
     def reveal(pos)
-        self[pos].reveal
+        @lost = self[pos].reveal ? true : false
         render
+    end
+
+    def flag(pos)
+        self[pos].flag
+        render
+    end
+
+    def win?()
+
+    end
+
+    def lost?()
+        @lost
     end
 
     def [](pos)
