@@ -1,9 +1,9 @@
 require_relative "board"
-require 'set'
+require "set"
 require "byebug"
 
 class Game
-    ACTIONS = {"r" => "reveal", "f" => "flag"}
+    ACTIONS = {"r" => "reveal", "f" => "flag", "s" => "save"}
     @@modes = ['easy', 'medium', 'hard']
 
     def initialize()
@@ -38,15 +38,18 @@ class Game
     end
 
     def play()
+        system("clear")
         @board.render
         action = get_action()
-        pos = get_pos(action)
+        pos = get_pos(action) if action != "s"
         case action
         when "r"
             @board.reveal(pos)
             @board.reveal_safe_neighbors(pos) if @board[pos].value == 0
         when "f"
             @board.flag(pos)
+        when "s"
+            save()
         end
     end
 
@@ -98,6 +101,9 @@ class Game
         else
             puts "BOOOOOM! You lose!"
         end
+    end
+
+    def save()
     end
 end
 

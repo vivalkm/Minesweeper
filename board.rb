@@ -1,4 +1,5 @@
 require_relative "tile"
+require "set"
 
 class Board
     def initialize(size, mode)
@@ -48,7 +49,14 @@ class Board
     end
 
     def render()
+        # Print header
+        print "   "
+        (0...@size).each { |col| print col.to_s + " " }
+        print "\n   " + "-" * @size * 2 + "\n"
+
+        # Print grid
         (0...@size).each do |row|
+            print row.to_s + "| "
             (0...@size).each do |col|
                 pos = [row, col]
                 self[pos].render()
@@ -145,5 +153,5 @@ class Board
 end
 
 if __FILE__ == $PROGRAM_NAME
-    b = Board.new(9)
+    b = Board.new(9, "easy")
 end
