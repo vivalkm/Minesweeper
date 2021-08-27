@@ -5,19 +5,25 @@ class Board
         @size = size
         @grid = Array.new(size) { Array.new(size) }
         @hit_bomb = false
+        @visited = Set.new()
         
         # Set the number of bombs based on mode
+        total_tiles = @size * @size
+        easy_bombs = total_tiles / 10
+        medium_bombs = total_tiles / 6
+        hard_bombs = total_tiles / 3
+        min_mine = 1
         case mode
         when 'easy'
-            @bomb_count = [@size * @size / 10, 1].max
+            @bomb_count = [easy_bombs, min_mine].max
         when 'medium'
-            @bomb_count = [@size * @size / 6, 1].max
+            @bomb_count = [medium_bombs, min_mine].max
         when 'hard'
-            @bomb_count = [@size * @size / 3, 1].max
+            @bomb_count = [hard_bombs, min_mine].max
         end
 
         # tracker of unrevealed non-bomb tiles
-        @remain = @size * @size - @bomb_count
+        @remain = total_tiles - @bomb_count
         populate()
     end
 
@@ -26,16 +32,16 @@ class Board
         bomb_pos_index = (0...@size * @size).to_a.sample(@bomb_count)
         bomb_pos = Set.new()
         bomb_pos_index.each { |i| bomb_pos << [i / @size, i % @size] }
-        bomb_pos.each { |pos| @grid[pos[0]][pos[1]] = Tile.new(true) }
+        bomb_pos.each { |pos| @grid[pos[0]][pos[1]] = Tile.new(true, bomb_pos) }
         
         # Update safe tile values based on bombs nearby.
         (0...@size).each do |row|
             (0...@size).each do |col|
                 pos = [row, col]
                 if !bomb_pos.include?(pos)
-                    @grid[row][col] = Tile.new(false)
+                    @grid[row][col] = Tile.new(false, pos)
                     count = neighbor(pos).count { |tile| tile.is_bomb if tile != nil }
-                    self[pos].reset_value(count)
+                    self[pos].set_value(count)
                 end
             end
         end
@@ -52,8 +58,9 @@ class Board
     end
 
     def reveal(pos)
-        if valid_pos?(pos)
+        if valid_pos?(pos) && !@visited.include?(self[pos])
             self[pos].reveal()
+            @visited << self[pos]
             @hit_bomb = true if self[pos].is_bomb
             @remain -= 1 if !@hit_bomb
         end
@@ -117,6 +124,21 @@ class Board
         return neighbors
     end
 
+    def reveal_safe_neighbors(pos)
+        bfs_queue = []
+        bfs_queue << self[pos]
+        while bfs_queue.length > 0
+            tile = bfs_queue.shift
+            if !tile.is_bomb
+                reveal(tile.pos)
+                if tile.value == 0
+                    bfs_queue += neighbor(tile.pos).reject { |tile| @visited.include?(tile) }
+                end
+            end
+            @visited << tile
+        end
+    end
+                
     def valid_pos?(pos)
         pos.all? { |i| (0...@size).include?(i) }
     end

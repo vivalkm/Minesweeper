@@ -3,8 +3,13 @@ require 'set'
 require "byebug"
 
 class Game
+    ACTIONS = {"r" => "reveal", "f" => "flag"}
+    @@modes = ['easy', 'medium', 'hard']
+
     def initialize()
-        @board = Board.new(get_size, get_mode)  
+        @options = Set.new()
+        @@modes.each { |mode| @options << mode }
+        @board = Board.new(get_size, get_mode)
     end
 
     def get_size()
@@ -21,14 +26,11 @@ class Game
     end
 
     def get_mode()
-        modes = ['easy', 'medium', 'hard']
-        options = Set.new()
-        modes.each { |mode| options << mode }
-        puts "Please choose a mode from #{modes}"
+        puts "Please choose a mode from #{@@modes}"
         print "> "
         mode = gets.chomp
-        while !options.include?(mode)
-            puts "Not a valid mode. Please choose one from the given options: #{modes}"
+        while !@options.include?(mode)
+            puts "Not a valid mode. Please choose one from the given options: #{@@modes}"
             print "> "
             mode = gets.chomp
         end
@@ -42,18 +44,19 @@ class Game
         case action
         when "r"
             @board.reveal(pos)
+            @board.reveal_safe_neighbors(pos) if @board[pos].value == 0
         when "f"
             @board.flag(pos)
         end
     end
 
     def get_action()
-        actions = ["r", "f"]
-        puts "What do you want to do? 'r' to reveal, 'f' to flag."
+        
+        puts "What do you want to do? #{ACTIONS}"
         print "> "
         action = gets.chomp
-        while !actions.include?(action)
-            puts "Not a valid action. Please choose one from the given actions: #{actions}"
+        while !ACTIONS.include?(action)
+            puts "Not a valid action. Please choose one from the given actions: #{ACTIONS}"
             print "> "
             action = gets.chomp
         end
@@ -65,9 +68,9 @@ class Game
         first_time = true
         until pos && pos.length == 2 && @board.valid_pos?(pos)
             if first_time
-                puts "Which tile do you want to #{action}? (e.g., '3,4')"
+                puts "Which tile do you want to #{ACTIONS[action]}? (e.g., '3,4')"
             else
-                puts "Invalid position. Which tile do you want to #{action}? (e.g., '3,4')"
+                puts "Invalid position. Which tile do you want to #{ACTIONS[action]}? (e.g., '3,4')"
             end
             print "> "
             begin

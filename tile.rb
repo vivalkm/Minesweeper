@@ -5,13 +5,14 @@ class Tile
     FLAG_VAL = :⚑
     BOMB_VAL = :❂
 
-    attr_reader :is_bomb, :face_up
+    attr_reader :is_bomb, :face_up, :value, :pos
 
-    def initialize(is_bomb)
+    def initialize(is_bomb, pos)
         @face_up = false
         @flagged = false
         @is_bomb = is_bomb
         @value = BOMB_VAL if @is_bomb
+        @pos = pos
     end
 
     def reveal()
@@ -30,11 +31,11 @@ class Tile
             elsif @value == 0
                 print @value
             elsif @value == 1
-                print @value.to_s.colorize(:green)
-            elsif @value == 2
-                print @value.to_s.colorize(:yellow)
-            elsif @value == 3
                 print @value.to_s.colorize(:light_blue)
+            elsif @value == 2
+                print @value.to_s.colorize(:green)
+            elsif @value == 3
+                print @value.to_s.colorize(:yellow)
             elsif @value >= 4
                 print @value.to_s.colorize(:magenta)
             end
@@ -46,7 +47,7 @@ class Tile
         print " "
     end
 
-    def reset_value(val)
+    def set_value(val)
         @value = val
     end
 end
