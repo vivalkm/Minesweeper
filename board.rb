@@ -1,24 +1,43 @@
 require_relative "tile"
 
 class Board
-    def initialize(size)
+    def initialize(size, mode)
         @size = size
         @grid = Array.new(size) { Array.new(size) }
-        @bomb_count = size
-        @non_bomb_count = size * (size - 1)
-        @lost = false
+        @hit_bomb = false
+        
+        # Set the number of bombs based on mode
+        case mode
+        when 'easy'
+            @bomb_count = [@size * @size / 10, 1].max
+        when 'medium'
+            @bomb_count = [@size * @size / 6, 1].max
+        when 'hard'
+            @bomb_count = [@size * @size / 3, 1].max
+        end
+
+        # tracker of unrevealed non-bomb tiles
+        @remain = @size * @size - @bomb_count
         populate()
         self.render()
     end
 
     def populate
-        tile_values = [true] * @bomb_count + [false] * @non_bomb_count
-        tile_values.shuffle!
-        i = 0
+        # Place bombs tiles randomly.
+        bomb_pos_index = (0...@size * @size).to_a.sample(@bomb_count)
+        bomb_pos = Set.new()
+        bomb_pos_index.each { |i| bomb_pos << [i / @size, i % @size] }
+        bomb_pos.each { |pos| @grid[pos[0]][pos[1]] = Tile.new(true) }
+        
+        # Update safe tile values based on bombs nearby.
         (0...@size).each do |row|
             (0...@size).each do |col|
-                @grid[row][col] = Tile.new(tile_values[i])
-                i += 1
+                pos = [row, col]
+                if !bomb_pos.include?(pos)
+                    @grid[row][col] = Tile.new(false)
+                    count = neighbor(pos).count { |tile| tile.is_bomb if tile != nil }
+                    self[pos].reset_value(count)
+                end
             end
         end
     end
@@ -26,28 +45,38 @@ class Board
     def render
         (0...@size).each do |row|
             (0...@size).each do |col|
-                @grid[row][col].render
+                pos = [row, col]
+                self[pos].render
             end
             puts
         end
     end
 
     def reveal(pos)
-        @lost = self[pos].reveal ? true : false
-        render
+        self[pos].reveal
+        @hit_bomb = true if self[pos].is_bomb
+        @remain -= 1 if !@hit_bomb
+    end
+
+    def reveal_all()
+        (0...@size).each do |row|
+            (0...@size).each do |col|
+                pos = [row, col]
+                reveal(pos)
+            end
+        end
     end
 
     def flag(pos)
         self[pos].flag
-        render
     end
 
     def win?()
-
+        @remain == 0
     end
 
     def lost?()
-        @lost
+        @hit_bomb
     end
 
     def [](pos)

@@ -2,7 +2,6 @@ class Tile
     BACK_VAL = :□
     FLAG_VAL = :⚑
     BOMB_VAL = :❂
-    NON_BOMB_VAL = :_
 
     attr_reader :is_bomb, :face_up
 
@@ -10,12 +9,11 @@ class Tile
         @face_up = false
         @flagged = false
         @is_bomb = is_bomb
-        @value = @is_bomb ? BOMB_VAL : NON_BOMB_VAL
+        @value = BOMB_VAL if @is_bomb
     end
 
     def reveal()
         @face_up = true
-        return @is_bomb
     end
 
     def flag()
@@ -31,5 +29,9 @@ class Tile
             print BACK_VAL
         end
         print " "
+    end
+
+    def reset_value(val)
+        @value = val
     end
 end
