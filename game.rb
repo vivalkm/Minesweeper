@@ -1,6 +1,6 @@
 require_relative "board"
 require "set"
-require "byebug"
+require "yaml"
 
 class Game
     ACTIONS = {"r" => "reveal", "f" => "flag", "s" => "save"}
@@ -54,7 +54,6 @@ class Game
     end
 
     def get_action()
-        
         puts "What do you want to do? #{ACTIONS}"
         print "> "
         action = gets.chomp
@@ -94,20 +93,30 @@ class Game
         while !@board.end?()
             play()
         end
+
         @board.reveal_all()
+        system("clear")
         @board.render()
         if @board.win?
-            puts "Congratulations! You win!!"
+            puts "\nCongratulations! You win!!"
         else
-            puts "BOOOOOM! You lose!"
+            puts "\nBOOOOOM! You lose!"
         end
     end
 
     def save()
+        puts "Enter a filename to save:"
+        print "> "
+        filename = gets.chomp
+        File.write(filename, YAML.dump(self))
     end
 end
 
 if __FILE__ == $PROGRAM_NAME
-    g = Game.new()
-    g.run
+    case ARGV.count
+    when 0
+        Game.new().run
+    when 1
+        YAML.load_file(ARGV.shift).run
+    end
 end
