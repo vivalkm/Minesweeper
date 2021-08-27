@@ -102,6 +102,18 @@ class Board
         right_pos =  [pos[0], pos[1] + 1]
         neighbors << self[right_pos] if valid_pos?(right_pos)
 
+        up_left_pos =  [pos[0] - 1, pos[1] - 1]
+        neighbors << self[up_left_pos] if valid_pos?(up_left_pos)
+
+        down_left_pos =  [pos[0] + 1, pos[1] - 1]
+        neighbors << self[down_left_pos] if valid_pos?(down_left_pos)
+
+        up_right_pos =  [pos[0] - 1, pos[1] + 1]
+        neighbors << self[up_right_pos] if valid_pos?(up_right_pos)
+
+        down_right_pos =  [pos[0] + 1, pos[1] + 1]
+        neighbors << self[down_right_pos] if valid_pos?(down_right_pos)
+
         return neighbors
     end
 

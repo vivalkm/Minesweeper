@@ -8,11 +8,13 @@ class Game
     end
 
     def get_size()
-        range = (5..20).to_a
+        range = (2..20).to_a
         puts "Please choose a number between 5 to 20 for the game size."
+        print "> "
         size = gets.chomp.to_i
         while size < range[0] || size > range[-1]
             puts "Size out of range. Please enter a size between 5 and 20."
+            print "> "
             size = gets.chomp.to_i
         end
         size
@@ -23,9 +25,11 @@ class Game
         options = Set.new()
         modes.each { |mode| options << mode }
         puts "Please choose a mode from #{modes}"
+        print "> "
         mode = gets.chomp
         while !options.include?(mode)
             puts "Not a valid mode. Please choose one from the given options: #{modes}"
+            print "> "
             mode = gets.chomp
         end
         mode
@@ -35,15 +39,22 @@ class Game
         @board.render
         action = get_action()
         pos = get_pos(action)
-
+        case action
+        when "r"
+            @board.reveal(pos)
+        when "f"
+            @board.flag(pos)
+        end
     end
 
     def get_action()
-        actions = ["reveal", "flag"]
-        puts "What do you want to do? #{actions}"
+        actions = ["r", "f"]
+        puts "What do you want to do? 'r' to reveal, 'f' to flag."
+        print "> "
         action = gets.chomp
         while !actions.include?(action)
             puts "Not a valid action. Please choose one from the given actions: #{actions}"
+            print "> "
             action = gets.chomp
         end
         action
@@ -76,6 +87,13 @@ class Game
     def run()
         while !@board.end?()
             play()
+        end
+        @board.reveal_all()
+        @board.render()
+        if @board.win?
+            puts "Congratulations! You win!!"
+        else
+            puts "BOOOOOM! You lose!"
         end
     end
 end
