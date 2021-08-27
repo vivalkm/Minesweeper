@@ -19,10 +19,9 @@ class Board
         # tracker of unrevealed non-bomb tiles
         @remain = @size * @size - @bomb_count
         populate()
-        self.render()
     end
 
-    def populate
+    def populate()
         # Place bombs tiles randomly.
         bomb_pos_index = (0...@size * @size).to_a.sample(@bomb_count)
         bomb_pos = Set.new()
@@ -42,20 +41,22 @@ class Board
         end
     end
 
-    def render
+    def render()
         (0...@size).each do |row|
             (0...@size).each do |col|
                 pos = [row, col]
-                self[pos].render
+                self[pos].render()
             end
             puts
         end
     end
 
     def reveal(pos)
-        self[pos].reveal
-        @hit_bomb = true if self[pos].is_bomb
-        @remain -= 1 if !@hit_bomb
+        if valid_pos?(pos)
+            self[pos].reveal()
+            @hit_bomb = true if self[pos].is_bomb
+            @remain -= 1 if !@hit_bomb
+        end
     end
 
     def reveal_all()
@@ -68,7 +69,7 @@ class Board
     end
 
     def flag(pos)
-        self[pos].flag
+        self[pos].flag()
     end
 
     def win?()
@@ -79,6 +80,10 @@ class Board
         @hit_bomb
     end
 
+    def end?()
+        win?() || lost?()
+    end
+
     def [](pos)
         @grid[pos[0]][pos[1]]
     end
@@ -86,21 +91,21 @@ class Board
     def neighbor(pos)
         neighbors = []
         up_pos =  [pos[0] - 1, pos[1]]
-        neighbors << self[up_pos] if valid?(up_pos)
+        neighbors << self[up_pos] if valid_pos?(up_pos)
 
         down_pos =  [pos[0] + 1, pos[1]]
-        neighbors << self[down_pos] if valid?(down_pos)
+        neighbors << self[down_pos] if valid_pos?(down_pos)
 
         left_pos =  [pos[0], pos[1] - 1]
-        neighbors << self[left_pos] if valid?(left_pos)
+        neighbors << self[left_pos] if valid_pos?(left_pos)
 
         right_pos =  [pos[0], pos[1] + 1]
-        neighbors << self[right_pos] if valid?(right_pos)
+        neighbors << self[right_pos] if valid_pos?(right_pos)
 
         return neighbors
     end
 
-    def valid?(pos)
+    def valid_pos?(pos)
         pos.all? { |i| (0...@size).include?(i) }
     end
 end
